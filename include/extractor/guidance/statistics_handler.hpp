@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <iterator>
+#include <map>
 #include <mutex>
-#include <unordered_map>
 
 #include <cstdint>
 
@@ -84,12 +84,14 @@ class StatisticsHandler final : public IntersectionHandler
         // numbers closer to the handlers and see how often handlers ran.
         for (const auto &road : intersection)
         {
+            if (road.entry_allowed)
+            {
+                const auto type = road.instruction.type;
+                const auto modifier = road.instruction.direction_modifier;
 
-            const auto type = road.instruction.type;
-            const auto modifier = road.instruction.direction_modifier;
-
-            type_hist[type] += 1;
-            modifier_hist[modifier] += 1;
+                type_hist[type] += 1;
+                modifier_hist[modifier] += 1;
+            }
         }
 
         return intersection;
@@ -97,8 +99,8 @@ class StatisticsHandler final : public IntersectionHandler
 
   private:
     mutable std::mutex lock;
-    mutable std::unordered_map<TurnType::Enum, std::uint64_t> type_hist;
-    mutable std::unordered_map<DirectionModifier::Enum, std::uint64_t> modifier_hist;
+    mutable std::map<TurnType::Enum, std::uint64_t> type_hist;
+    mutable std::map<DirectionModifier::Enum, std::uint64_t> modifier_hist;
 };
 
 } // namespace guidance
